@@ -115,7 +115,6 @@ class ImpresionController extends CController {
       echo 'success';
     }
 
-
     function actionReenviarLinea(){
 
          $idp = $_POST["idp"];

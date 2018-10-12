@@ -9,7 +9,7 @@ __pycache__/
 #Achivos no necesarios
 *settings.py
 *.db
-*.SD_Store
+.SD_Store
 config/
 medida/
 

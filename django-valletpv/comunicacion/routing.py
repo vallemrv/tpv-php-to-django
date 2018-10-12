@@ -8,9 +8,9 @@
 
 
 from django.conf.urls import url
-
 from . import consumers
 
+url_reg = r'^ws/impresion/(?P<print_name>[^/]+)/$'
 websocket_urlpatterns = [
-    url(r'^ws/impresion/(?P<print_name>[^/]+)/$', consumers.ImpresionConsumer),
+    url(url_reg, consumers.ImpresionConsumer),
 ]

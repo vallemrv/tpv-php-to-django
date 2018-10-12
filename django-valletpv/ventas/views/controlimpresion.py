@@ -9,12 +9,15 @@ import websocket
 import json
 from datetime import datetime
 from django.db.models import Q, Count, Sum, F
+from django.db.models.fields import DecimalField
 from django.core.serializers.json import DjangoJSONEncoder
 from django.forms.models import model_to_dict
 from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
 from tokenapi.http import JsonResponse
 from gestion.models import (Pedidos, Lineaspedido, Ticket, Infmesa, Teclas,
-                            Ticketlineas, Receptores, Mesasabiertas, Camareros)
+                            Arqueocaja, Efectivo, Ticketlineas, Receptores,
+                            Mesasabiertas, Camareros)
 
 
 def imprimir_pedido(request, id):
@@ -43,8 +46,55 @@ def imprimir_pedido(request, id):
     send_pedidos_ws(request, receptores)
     return JsonResponse({})
 
-def preimprimir_pedido(request, id):
-    print(id)
+
+def imprimir_desglose(request, id):
+    arqueo = Arqueocaja.objects.get(pk=id)
+    cambio = arqueo.cambio
+    efectivo = arqueo.efectivo_set.all().values("moneda").annotate(can = Sum("can")).order_by("-moneda")
+    retirar = arqueo.efectivo_set.all().aggregate(total=Sum(F("can") * F("moneda"), output_field=DecimalField()))['total']
+    retirar = float(retirar) - float(cambio)
+    print(retirar)
+    lineas_retirada = []
+    lineas_cambio = []
+    parcial = 0
+    for linea in efectivo:
+        can = linea["can"]
+        moneda = linea["moneda"]
+        texto = "moneda" if moneda < 5 else "billete"
+        texto = texto + "s" if can > 1 else ""
+        if retirar <= parcial:
+            if can > 0:
+                lineas_cambio.append({"titulo": "Cambio", 'can':can,' tipo':float(moneda), 'texto_tipo': texto })
+        elif retirar > ((can * float(moneda)) + parcial):
+            parcial = parcial + float((can * moneda))
+            if can > 0:
+                lineas_retirada.append({"titulo": "Retirar", 'can':can,'tipo':float(moneda), 'texto_tipo': texto })
+        else:
+            diferencia = retirar - parcial
+            can_parcial = int(diferencia/float(moneda))
+            parcial = parcial + (can_parcial * float(moneda))
+            if can_parcial > 0:
+                lineas_retirada.append({"titulo": "Retirar", 'can':can_parcial,'tipo':float(moneda), 'texto_tipo': texto })
+            texto = "moneda" if moneda < 5 else "billete"
+            texto = texto + "s" if can_parcial > 1 else texto
+            if can - can_parcial > 0:
+                lineas_cambio.append({"titulo": "Cambio", 'can':can - can_parcial, 'tipo':float(moneda), 'texto_tipo': texto })
+
+    obj_cambio = {
+        "op": "desglose",
+        "receptor": Receptores.objects.get(nombre='Ticket').nomimp,
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+        "lineas": lineas_cambio
+    }
+
+    obj_desglose = {
+        "op": "desglose",
+        "receptor": Receptores.objects.get(nombre='Ticket').nomimp,
+        "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+        "lineas": lineas_retirada
+    }
+    send_ticket_ws(request, obj_desglose)
+    send_ticket_ws(request, obj_cambio)
     return JsonResponse({})
 
 def preimprimir_ticket(request, id):
@@ -65,7 +115,8 @@ def preimprimir_ticket(request, id):
             l["nombre"] = art.nombre
         except:
             art = infmesa.lineaspedido_set.filter(idart=l["idart"])
-            l["nombre"] = art.nombre
+            if len(art) > 0:
+                l["nombre"] = art[0].linea.nombre
         lineas_ticket.append(l)
     obj = {
         "op": "preticket",
@@ -97,7 +148,8 @@ def imprimir_ticket(request, id):
             l["nombre"] = art.nombre
         except:
             art = ticket.ticketlineas_set.filter(linea__idart=l["idart"])
-            l["nombre"] = art.nombre
+            if len(art) > 0:
+                l["nombre"] = art[0].linea.nombre
         lineas_ticket.append(l)
 
     obj = {
@@ -119,6 +171,7 @@ def reenviarlinea(request, id, idl, nombre):
     nombre = urllib.parse.unquote(nombre).replace("+", " ")
     pedido = Pedidos.objects.get(pk=id)
     camareo = Camareros.objects.get(pk=pedido.camarero_id)
+    print(pedido.infmesa)
     mesa = pedido.infmesa.mesasabiertas_set.get().mesa
     lineas = pedido.lineaspedido_set.filter(idart=idl, nombre=nombre).values("idart",
                                            "nombre",

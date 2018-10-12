@@ -13,27 +13,29 @@ import threading
 class receptor_manager():
 
     def __init__(self, usb=None, url=None, ip_caja=None):
-        from tpv.impresora import DocPrint
-        self.doc = DocPrint(usb=usb,url=url,ip_caja=ip_caja)
+        #from tpv.impresora import DocPrint
+        #self.doc = DocPrint(usb=usb,url=url,ip_caja=ip_caja)
+        pass
 
     def on_message(ws, message):
         message = json.loads(message)["message"]
         op = message["op"]
         if op == "open":
-            ws.doc.abrir_cajon()
+            #ws.doc.abrir_cajon()
+            pass
         elif op == "desglose":
-            ws.doc.printDesglose(message["fecha"], message["lineas"])
+            print(message["fecha"], message["lineas"])
         elif op == "ticket":
             cambio = float(message['efectivo']) - float(message['total'])
-            ws.doc.imprimirTicket(message['num'], message['camarero'], message['fecha'], message["mesa"],
+            print(message['num'], message['camarero'], message['fecha'], message["mesa"],
                                message['total'], message['efectivo'], cambio, message['lineas'])
         elif op == "pedido":
-            ws.doc.imprimirPedido(message["camarero"], message["mesa"], message["hora"], message["lineas"] )
+            print(message["camarero"], message["mesa"], message["hora"], message["lineas"] )
         elif op == "urgente":
-            ws.doc.imprimirUrgente(message["camarero"], message["mesa"], message["hora"], message["lineas"] )
+            print(message["camarero"], message["mesa"], message["hora"], message["lineas"] )
 
         elif op == "preticket":
-            ws.doc.imprimirPreTicket(message["camarero"], message['numcopias'], message['fecha'],
+            print(message["camarero"], message['numcopias'], message['fecha'],
                                   message["mesa"], message['lineas'], message['total'])
 
 
@@ -66,5 +68,5 @@ def run_websoker(url, args):
 if __name__ == "__main__":
     print_caja = {'usb':(0x1504,0x002b,0,0x81,0x02)}
     print_cocina = {"usb":(0x20d1,0x7007,0,0x81,0x02)}
-    threading.Thread(target=run_websoker, args=("ws://gstr.elbrasilia.com/ws/impresion/caja/", print_caja)).start()
-    threading.Thread(target=run_websoker, args=("ws://gstr.elbrasilia.com/ws/impresion/cocina/", print_cocina)).start()
+    threading.Thread(target=run_websoker, args=("ws://gsfm.mibtres.com/ws/impresion/caja/", print_caja)).start()
+    #threading.Thread(target=run_websoker, args=("ws://gstr.elbrasilia.com/ws/impresion/cocina/", print_cocina)).start()

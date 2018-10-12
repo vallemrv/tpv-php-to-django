@@ -25,7 +25,6 @@ class Arqueocaja(models.Model):
     descuadre = models.FloatField(db_column='Descuadre')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'arqueocaja'
 
 
@@ -38,7 +37,6 @@ class Camareros(models.Model):
     activo = models.IntegerField(db_column='Activo')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'camareros'
 
 
@@ -50,7 +48,6 @@ class Cierrecaja(models.Model):
     hora = models.CharField(db_column='Hora', max_length=5)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'cierrecaja'
 
 
@@ -60,18 +57,7 @@ class Colores(models.Model):
     rgb = models.CharField(db_column='RGB', max_length=11)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'colores'
-
-
-class Cuentas(models.Model):
-    id = models.AutoField(db_column='ID', primary_key=True)  # Field name made lowercase.
-    nombre = models.CharField(db_column='Nombre', max_length=50)  # Field name made lowercase.
-    descripcion = models.CharField(db_column='Descripcion', max_length=100)  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'cuentas'
 
 
 class Efectivo(models.Model):
@@ -81,7 +67,6 @@ class Efectivo(models.Model):
     moneda = models.DecimalField(db_column='Moneda', max_digits=5, decimal_places=2)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'efectivo'
 
 
@@ -93,7 +78,6 @@ class Familias(models.Model):
     receptor = models.ForeignKey('Receptores',  on_delete=models.CASCADE, db_column='IDReceptor')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'familias'
 
 
@@ -104,7 +88,6 @@ class Gastos(models.Model):
     importe = models.DecimalField(db_column='Importe', max_digits=6, decimal_places=2)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'gastos'
 
 
@@ -116,7 +99,6 @@ class Historialnulos(models.Model):
     motivo = models.CharField(db_column='Motivo', max_length=100)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'historialnulos'
 
 
@@ -127,7 +109,6 @@ class HorarioUsr(models.Model):
     usurario = models.ForeignKey('Usuarios',  on_delete=models.CASCADE, db_column='IDUsr')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'horario_usr'
 
 
@@ -140,7 +121,6 @@ class Infmesa(models.Model):
     numcopias = models.IntegerField(db_column='NumCopias')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'infmesa'
 
 
@@ -154,7 +134,6 @@ class Lineaspedido(models.Model):
     nombre = models.CharField(db_column='Nombre', max_length=70)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'lineaspedido'
 
 
@@ -164,7 +143,6 @@ class Mesas(models.Model):
     orden = models.IntegerField(db_column='Orden')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'mesas'
 
 
@@ -174,7 +152,6 @@ class Mesasabiertas(models.Model):
     mesa = models.ForeignKey(Mesas, on_delete=models.CASCADE, db_column='IDMesa')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'mesasabiertas'
 
 
@@ -184,7 +161,6 @@ class Mesaszona(models.Model):
     mesa = models.ForeignKey(Mesas,  on_delete=models.CASCADE, db_column='IDMesa')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'mesaszona'
 
 
@@ -196,7 +172,6 @@ class Movimientos(models.Model):
     isub_pago = models.IntegerField(db_column='IDSub_pago')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'movimientos'
 
 
@@ -207,7 +182,6 @@ class Pedidos(models.Model):
     camarero_id = models.IntegerField(db_column='IDCam')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'pedidos'
 
 
@@ -217,7 +191,6 @@ class Receptores(models.Model):
     nomimp = models.CharField(db_column='nomImp', max_length=40)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'receptores'
 
 
@@ -229,7 +202,6 @@ class Secciones(models.Model):
     orden = models.IntegerField(db_column='Orden')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'secciones'
 
 
@@ -238,7 +210,6 @@ class SeccionesCom(models.Model):
     nombre = models.CharField(db_column='Nombre', max_length=11)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'secciones_com'
 
 
@@ -247,7 +218,6 @@ class Servidos(models.Model):
     linea = models.ForeignKey(Lineaspedido,  on_delete=models.CASCADE, db_column='IDLinea')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'servidos'
 
 
@@ -260,7 +230,6 @@ class Subcuentas(models.Model):
     tipo = models.CharField(db_column='Tipo', max_length=5)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'subcuentas'
 
 
@@ -271,7 +240,6 @@ class Subteclas(models.Model):
     incremento = models.DecimalField(db_column='Incremento', max_digits=6, decimal_places=2)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'subteclas'
 
 
@@ -281,7 +249,6 @@ class Sugerencias(models.Model):
     sugerencia = models.CharField(db_column='Sugerencia', max_length=50)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'sugerencias'
 
 
@@ -292,7 +259,6 @@ class Sync(models.Model):
     args = models.CharField(max_length=50)
 
     class Meta:
-        managed = False
         db_table = 'sync'
 
 
@@ -307,7 +273,6 @@ class Teclas(models.Model):
     ttf = models.CharField(db_column='TTF', max_length=50)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'teclas'
 
 
@@ -318,7 +283,6 @@ class Teclascom(models.Model):
     orden = models.IntegerField(db_column='Orden')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'teclascom'
 
 
@@ -328,7 +292,6 @@ class Teclaseccion(models.Model):
     tecla = models.ForeignKey(Teclas,  on_delete=models.CASCADE, db_column='IDTecla')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'teclaseccion'
 
 
@@ -342,7 +305,6 @@ class Ticket(models.Model):
     mesa = models.CharField(db_column='Mesa', max_length=40)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'ticket'
 
 
@@ -352,7 +314,6 @@ class Ticketlineas(models.Model):
     linea = models.ForeignKey(Lineaspedido,  on_delete=models.CASCADE, db_column='IDLinea')  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'ticketlineas'
 
 
@@ -364,7 +325,6 @@ class Usuarios(models.Model):
     pass_field = models.CharField(db_column='Pass', max_length=11)  # Field name made lowercase. Field renamed because it was a Python reserved word.
 
     class Meta:
-        managed = False
         db_table = 'usuarios'
 
 
@@ -376,5 +336,4 @@ class Zonas(models.Model):
     rgb = models.CharField(db_column='RGB', max_length=50)  # Field name made lowercase.
 
     class Meta:
-        managed = False
         db_table = 'zonas'

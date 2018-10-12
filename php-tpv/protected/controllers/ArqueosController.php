@@ -9,8 +9,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 class ArqueosController extends CController{
-    
-  
+
+
      //put your code here
 
     public function actionGetCambio(){
@@ -23,15 +23,15 @@ class ArqueosController extends CController{
             echo "0.00";
         }
     }
-    
+
     public function actionArquear(){
-        
+
         $efectivo = $_POST["efectivo"];
         $cambio = $_POST["cambio"];
         $gastos = $_POST["gastos"];
         $ef = json_decode($_POST["des_efectivo"]);
         $gas = json_decode($_POST["des_gastos"]);
-        
+
         ignore_user_abort(true);
         set_time_limit(0);
         ob_start();
@@ -42,7 +42,7 @@ class ArqueosController extends CController{
         ob_end_flush();
         ob_flush();
         flush();
-        
+
         $condicion = new CDbCriteria();
         $condicion->order= "ID DESC";
         $cierre = CierresCaja::model("CierresCaja")->find($condicion);
@@ -50,7 +50,7 @@ class ArqueosController extends CController{
             $c = new CierresCaja();
             $c->TicketCom = Ticket::model("Ticket")->find()->ID;
             $c->TicketFinal = Ticket::model("Ticket")->find($condicion)->ID;
-            
+
         } else {
             $c = new CierresCaja();
             $c->TicketCom = $cierre->TicketFinal+1;
@@ -66,7 +66,7 @@ class ArqueosController extends CController{
                  ->join('lineaspedido', 'lineaspedido.ID=ticketlineas.IDLinea')
                  ->where("ticket.ID >= ".$c->TicketCom. " AND ticket.ID <= ".$c->TicketFinal ." AND ticket.Entrega > 0")
                  ->queryScalar();
-         
+
          $arqueo = new Arqueos();
          $arqueo->IDCierre = $c->ID;
          $arqueo->Cambio = $cambio;
@@ -86,16 +86,29 @@ class ArqueosController extends CController{
              $lg->Importe = $g->Importe;
              $lg->save();
          }
-         
-          
-         GesImpresion::ImprimirCambio(Yii::app()->params["empresa"], $cambio);
-         GesImpresion::ImprimirRetirada(Yii::app()->params["empresa"], $arqueo->getDesRetirada());
-         foreach (Usuarios::getUsuariosMail() as $usr)
+
+         if (Yii::app()->params["django_print"]){
+             ComDjango::ImprimirArqueo(Yii::app()->params["urldj"], $arqueo->ID);
+         }else{
+             GesImpresion::ImprimirCambio(Yii::app()->params["empresa"], $cambio);
+             GesImpresion::ImprimirRetirada(Yii::app()->params["empresa"], $arqueo->getDesRetirada());
+         }
+          foreach (Usuarios::getUsuariosMail() as $usr)
                    Mails::sendCierreCaja($usr, $arqueo->getDesgloseCierre());
-         
     }
-    
-    
+
+    public function actionTestArqueo($id){
+        $condicion = new CDbCriteria();
+        $condicion->addCondition("ID = $id");
+        $arqueo = Arqueos::model("Arqueos")->find($condicion);
+        //ComDjango::ImprimirArqueo(Yii::app()->params["urldj"], $arqueo->ID);
+        foreach (Usuarios::getUsuariosMail() as $usr)
+            mail($usr["email"], "Que passaaaaaaaa", "Illooooooooo");
+            //Mails::sendCierreCaja($usr, $arqueo->getDesgloseCierre());
+        var_dump($arqueo->getDesgloseCierre());
+    }
+
+
     /*public function actionRF(){
         $condicion = new CDbCriteria();
         $condicion->addCondition("ID > 1497");

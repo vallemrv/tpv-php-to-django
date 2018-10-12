@@ -55,4 +55,14 @@ class ComDjango {
           curl_exec($ch);
           curl_close($ch);
     }
+
+    static function ImprimirArqueo($url, $id){
+        $ch = curl_init($url."ventas/imprimir_desglose/".$id."/");
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_exec($ch);
+        curl_close($ch);
+    }
+
+
+
 }

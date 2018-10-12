@@ -9,25 +9,39 @@
 from __future__ import unicode_literals
 from datetime import datetime
 
-from escpos.printer import Network
+from escpos.printer import Network, Usb, File
 from escpos.escpos import EscposIO
 from escpos import escpos
 import locale
 
 import sys
 
-locale.setlocale(locale.LC_TIME, "es_ES.UTF-8")
+#locale.setlocale(locale.LC_TIME, "es_ES.UTF-8")
 
 ip_caja = '192.168.1.8'
 
 class DocPrint():
 
-    def __init__(self, ip_caja):
-        self.ip_caja = ip_caja
+    def __init__(self, ip_caja=None, usb=None, url=None):
+        if ip_caja!=None:
+            self.ip_caja = ip_caja
+            self.tipo = "Network"
+        if usb!=None:
+            self.usb = usb["usb"]
+            self.tipo = "Usb"
+        if url!=None:
+            self.url = url
+            self.tipo = "File"
 
     def abrir_cajon(self,  *args):
         try:
-            printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Network":
+                printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Usb":
+                printer = Usb(*self.usb)
+            if self.tipo == "File":
+                printer = File(self.url)
+
             printer.cashdraw(2)
         except Exception as e:
             print("[ERROR  ] %s" % e)
@@ -42,11 +56,19 @@ class DocPrint():
 
 
         try:
-            printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Network":
+                printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Usb":
+                printer = Usb(*self.usb)
+            if self.tipo == "File":
+                printer = File(self.url)
+
 
 
             with EscposIO(printer) as p:
                 p.printer.codepage = 'cp858'
+                p.printer._raw(escpos.CHARCODE_PC852)
+
                 p.writelines("Cierre de caja", align='center', width=2, height=2)
 
                 p.writelines(fecha, align='center', width=2, height=2)
@@ -57,8 +79,9 @@ class DocPrint():
                     can = linea["can"]
                     texto_tipo = linea["texto_tipo"]
                     tipo = linea["tipo"]
-                    p.writelines("Retirar {0: >5} {1} de {2}".format(can, texto_tipo,
-                                                                     tipo),height=2,align='center')
+                    titulo = linea["titulo"]
+                    p.writelines("{3} {0: >5} {1: <3} de {2:6.2f} €".format(can, texto_tipo,
+                                                                     tipo, titulo ),height=2,align='center')
 
                 p.writelines("")
                 p.writelines("")
@@ -75,20 +98,24 @@ class DocPrint():
 
         try:
 
-            printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Network":
+                printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Usb":
+                printer = Usb(*self.usb)
+            if self.tipo == "File":
+                printer = File(self.url)
+
 
 
             with EscposIO(printer) as p:
                 p.printer.codepage = 'cp858'
                 p.printer._raw(escpos.CHARCODE_PC852)
+
                 p.printer.image("logo.png")
-                p.writelines('')
-                p.writelines('Calle San Pablo, 10', font='a', align='center')
-                p.writelines('18013 Granada', font='a', align='center')
-                p.writelines('NIF: 74680606C', font='b', align='center')
-                p.writelines('')
+                p.writelines('Calle Dr Mesa Moles, 2', font='a', align='center')
+                p.writelines('18012 Granada', font='a', align='center')
+                p.writelines('NIF: B18616201', font='b', align='center')
                 p.writelines('------------------------------------------', align='center')
-                p.writelines('FECHA', height=2, width=2, font='a', align='center')
                 p.writelines(fecha, height=2, width=1, font='b', align='center')
                 p.writelines("Num Ticket: %d" % num,font='a', align='center')
                 p.writelines("Camarero: %s" % camarero,  font='a', align='center')
@@ -98,10 +125,10 @@ class DocPrint():
 
                 for ln in lineas:
                     p.writelines("{0: >3} {1: <20} {2:5.2f} € {3:6.2f} €".format(ln['can'], ln['nombre'],
-                                  float(ln['precio']), float(ln['totallinea'])), align='center', font="a")
+                                  float(ln['precio']), float(ln['totallinea'])), density=1, align='center')
 
 
-                p.writelines("")
+                p.writelines("",  text_type='bold',  font='b', align='center')
                 p.writelines("Total: {0:0.2f} €".format(float(total)),
                               align='right', height=2)
                 p.writelines("Efectivo: {0:0.2f} €".format(float(efectivo)),
@@ -109,23 +136,29 @@ class DocPrint():
                 p.writelines("Cambio: {0:0.2f} €".format(float(cambio)),
                               align='right', )
 
+                p.writelines("",  text_type='bold',  font='a', align='center')
+                p.writelines("Factura simplificada",  text_type='bold',  font='a', align='center')
+                p.writelines("Iva incluido",  text_type='bold', font='a',  align='center')
+                p.writelines("Gracias por su visita",font='a',   align='center')
 
-                p.writelines("")
-                p.writelines("Factura simplificada",  text_type='bold', height=2, align='center')
-                p.writelines("Iva incluido",  text_type='bold', height=2, align='center')
-                p.writelines("")
-                p.writelines("Gracias por su visita",  height=2, align='center')
-                p.writelines("")
-                p.writelines("")
         except Exception as e:
             print("[ERROR  ] %s" % e)
 
     def imprimirPedido(self, camarero, mesa, hora, lineas):
 
         try:
-            printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Network":
+                printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Usb":
+                printer = Usb(*self.usb)
+            if self.tipo == "File":
+                printer = File(self.url)
+
 
             with EscposIO(printer) as p:
+                p.printer.codepage = 'cp858'
+                p.printer._raw(escpos.CHARCODE_PC852)
+
                 p.printer.set(align='center')
                 p.writelines("")
                 p.writelines('------------------------------------------', align='center')
@@ -147,10 +180,18 @@ class DocPrint():
 
     def imprimirUrgente(self, camarero, mesa, hora, lineas):
         try:
-            printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Network":
+                printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Usb":
+                printer = Usb(*self.usb)
+            if self.tipo == "File":
+                printer = File(self.url)
+
 
             with EscposIO(printer) as p:
                 p.printer.codepage = 'cp858'
+                p.printer._raw(escpos.CHARCODE_PC852)
+
                 p.printer.set(align='center')
                 p.writelines("")
                 p.writelines('URGENTE!!', height=2, width=2, font='a', align='center')
@@ -180,11 +221,18 @@ class DocPrint():
             fecha = fecha.strftime("El %a %d-%B a las (%H:%M)")
 
         try:
-            printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Network":
+                printer = Network(self.ip_caja, timeout=1)
+            if self.tipo == "Usb":
+                printer = Usb(*self.usb)
+            if self.tipo == "File":
+                printer = File(self.url)
+
             with EscposIO(printer) as p:
                 p.printer.codepage = 'cp858'
-                p.printer.set(align='center')
                 p.printer._raw(escpos.CHARCODE_PC852)
+
+                p.printer.set(align='center')
                 p.writelines('PRETICKET', font='a', height=2, align='center')
                 p.writelines('')
                 p.writelines('------------------------------------------', align='center')
@@ -217,9 +265,10 @@ if __name__ == '__main__':
     import sys
     import os
     import locale
-    locale.setlocale(locale.LC_TIME, "es_ES.UTF-8") # swedish
 
-    with EscposIO(Network('192.168.1.8', port=9100)) as p:
+    #locale.setlocale(locale.LC_TIME, "es_ES.UTF-8") # swedish
+
+    with EscposIO(File("/dev/usb/lp0")) as p:
         p.printer.codepage = 'cp858'
         p.printer._raw(escpos.CHARCODE_PC852)
         p.writelines("ñññññ€", height=2, width=2)

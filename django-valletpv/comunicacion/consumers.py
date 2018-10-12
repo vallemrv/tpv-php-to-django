@@ -8,6 +8,7 @@
 
 # chat/consumers.py
 from asgiref.sync import async_to_sync
+from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
@@ -15,7 +16,7 @@ import json
 class ImpresionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.print_name = self.scope['url_route']['kwargs']['print_name']
-        self.print_group_name = 'print_%s' % self.print_name
+        self.print_group_name = settings.EMPRESA + "_" + self.print_name
 
         # Join room group
         await self.channel_layer.group_add(

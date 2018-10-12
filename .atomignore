@@ -2,3 +2,5 @@
 *.pyc
 *.pyo
 .git
+__pycache__
+.env

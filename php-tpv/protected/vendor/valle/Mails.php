@@ -6,15 +6,15 @@
  * @author valle
  */
 class Mails {
-    
-    
-    
+
+
+
      public static function sendCierreCaja($para, $desglose){
         // Varios destinatarios
         $de = 'info@elbrasilia.com';
-          
+
         // subject
-        
+
         $titulo = 'Cierre '. Mails::getDiaSemana() ." - ". date("d/m/Y");
 
         // message
@@ -33,13 +33,13 @@ class Mails {
           <p> Descuadre: %01.2f € </p>
           <h4>Desglose de gastos </h4> ', $desglose["TotalEfectivo"],$desglose["TotalTarjeta"], $desglose["gastos"],
                                      $desglose["TotalCaja"], $desglose["CajaReal"],$desglose["Descuadre"]);
-        
+
           foreach ($desglose["des_gastos"] as $gasto) $mensaje .= sprintf ("<p> %-50s  %6s € </p>",$gasto["Descripcion"], sprintf ("%01.2f", $gasto["Importe"]) );
-          
+
           $mensaje.="<h4>Desglose de ventas </h4>";
-          
+
           foreach ($desglose["des_ventas"] as $venta) $mensaje .= sprintf ("<p> %6s  %-100s  %7s € </p>", $venta["Can"], $venta["Nombre"], sprintf ("%01.2f", $venta["Total"]) );
-         
+
           $mensaje.='</body> </html> ';
 
         // Para enviar un correo HTML mail, la cabecera Content-type debe fijarse
@@ -52,9 +52,9 @@ class Mails {
 
         // Mail it
         mail($para["email"], $titulo, $mensaje, $cabeceras);
-        
+
        }
-    
+
        static function getFranja(){
            $hora = date("H:m");
            if(($hora < "06:00") || ($hora >= "21:30" && $hora <= "23:59")) return "noche";
@@ -63,7 +63,7 @@ class Mails {
            if(($hora >= "06:01" && $hora <= "14:59")) return "mañana";
            return "";
        }
-       
+
        static function  getDiaSemana(){
            $hora = date("H:m");
            $d = date("w");

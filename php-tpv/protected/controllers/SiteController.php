@@ -18,5 +18,14 @@
            header("Location: /gestion");
         }
 
+        public function actionColores(){
+           $color = Colores::model("Colores")->findAll();
+           $a = array();
+           foreach($color as $m){
+               $a[] = $m->attributes;
+           }
+           echo json_encode($a);
+        }
+
     }
 ?>

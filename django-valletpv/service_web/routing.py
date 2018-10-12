@@ -8,13 +8,13 @@
 
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
-import impresion.routing
+import comunicacion.routing
 
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
     'websocket': AuthMiddlewareStack(
         URLRouter(
-            impresion.routing.websocket_urlpatterns
+            comunicacion.routing.websocket_urlpatterns
         )
     ),
 })
