@@ -8,6 +8,7 @@ __pycache__/
 
 #Achivos no necesarios
 *settings.py
+*env*
 *.db
 .SD_Store
 config/

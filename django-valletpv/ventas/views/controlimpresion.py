@@ -53,7 +53,6 @@ def imprimir_desglose(request, id):
     efectivo = arqueo.efectivo_set.all().values("moneda").annotate(can = Sum("can")).order_by("-moneda")
     retirar = arqueo.efectivo_set.all().aggregate(total=Sum(F("can") * F("moneda"), output_field=DecimalField()))['total']
     retirar = float(retirar) - float(cambio)
-    print(retirar)
     lineas_retirada = []
     lineas_cambio = []
     parcial = 0
@@ -64,7 +63,7 @@ def imprimir_desglose(request, id):
         texto = texto + "s" if can > 1 else ""
         if retirar <= parcial:
             if can > 0:
-                lineas_cambio.append({"titulo": "Cambio", 'can':can,' tipo':float(moneda), 'texto_tipo': texto })
+                lineas_cambio.append({"titulo": "Cambio", 'can':can,'tipo':float(moneda), 'texto_tipo': texto })
         elif retirar > ((can * float(moneda)) + parcial):
             parcial = parcial + float((can * moneda))
             if can > 0:
@@ -104,10 +103,9 @@ def preimprimir_ticket(request, id):
     infmesa.save()
     camareo = infmesa.camarero
     mesa = mesa.mesa
-    lineas = infmesa.lineaspedido_set.filter(Q(estado="P") |
-                                            Q(estado="N")).values("idart",
-                                                                  "precio").annotate(can=Count('idart'),
-                                                                                     totallinea=Sum("precio"))
+    lineas = infmesa.lineaspedido_set.filter(estado="P")
+    lineas = lineas.values("idart", "precio").annotate(can=Count('idart'),
+                                                       totallinea=Sum("precio"))
     lineas_ticket = []
     for l in lineas:
         try:
@@ -126,7 +124,7 @@ def preimprimir_ticket(request, id):
         "mesa": mesa.nombre,
         "numcopias": infmesa.numcopias,
         "lineas": lineas_ticket,
-        'total': infmesa.lineaspedido_set.all().aggregate(Total=Sum("precio"))['Total']
+        'total': infmesa.lineaspedido_set.filter(estado="P").aggregate(Total=Sum("precio"))['Total']
     }
 
     send_ticket_ws(request, obj)
@@ -208,14 +206,12 @@ def abrircajon(request):
 def send_pedidos_ws(request, datos):
     for k, v in datos.items():
         url = ''.join(['ws://', get_current_site(request).domain, '/ws/impresion/', v["receptor"], "/"])
-        websocket.enableTrace(True)
         ws = websocket.create_connection(url)
         ws.send(json.dumps({"message": v}))
         ws.close()
 
 def send_ticket_ws(request, v):
     url = ''.join(['ws://', get_current_site(request).domain, '/ws/impresion/', v["receptor"], "/"])
-    websocket.enableTrace(True)
     ws = websocket.create_connection(url)
     ws.send(json.dumps({"message": v}, cls=DjangoJSONEncoder))
     ws.close()
