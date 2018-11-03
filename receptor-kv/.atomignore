@@ -1,0 +1,4 @@
+*.pyo
+*.pyc
+.DBStore
+__pycache__/
