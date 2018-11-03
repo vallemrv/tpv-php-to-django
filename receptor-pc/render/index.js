@@ -54,7 +54,7 @@ app = new Vue({
 
 
 
-var socket = new WebSocket("ws://gstr.elbrasilia.com/ws/impresion/caja/");
+var socket = new WebSocket("ws://localhost/ws/impresion/caja/");
 
 socket.onopen = function(){
 	console.log("Socket has been opened!");

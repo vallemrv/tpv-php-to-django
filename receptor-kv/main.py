@@ -152,7 +152,7 @@ class ReceptorWidget(AnchorLayout):
 class ReceptorApp(App):
     def build(self):
         self.receptor_widget = ReceptorWidget()
-        self.manager = ReceptorManager("ws://gstr.elbrasilia.com/ws/impresion/caja/",
+        self.manager = ReceptorManager("ws://localhost/ws/impresion/caja/",
                                         self.receptor_widget)
         return self.receptor_widget
 
